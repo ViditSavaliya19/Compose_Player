@@ -82,6 +82,7 @@ dependencies {
     implementation(libs.logging.interceptor)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.compose)
 }
 kapt {
     correctErrorTypes = true
