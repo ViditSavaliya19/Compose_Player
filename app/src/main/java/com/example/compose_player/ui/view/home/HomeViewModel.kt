@@ -4,6 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.exoplayer.ExoPlayer
 import com.example.compose_player.data.model.MusicModelItem
 import com.example.compose_player.data.repository.MusicRepository
 import com.example.compose_player.utils.network.DataState

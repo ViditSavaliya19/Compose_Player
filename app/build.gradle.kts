@@ -83,6 +83,8 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.compose)
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.33.2-alpha")
+    implementation ("androidx.media3:media3-exoplayer:1.1.1")
 }
 kapt {
     correctErrorTypes = true
