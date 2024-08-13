@@ -5,6 +5,7 @@ import com.example.compose_player.data.repository.MusicRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -16,6 +17,12 @@ object RepositoryModule {
     @Provides
     fun provideRepository(apiServices: ApiServices): MusicRepository {
         return MusicRepository(apiServices)
+    }
+
+    @Singleton
+    @Provides
+    fun provideApplicationContext(): ApplicationContext {
+        return  ApplicationContext()
     }
 
 }
