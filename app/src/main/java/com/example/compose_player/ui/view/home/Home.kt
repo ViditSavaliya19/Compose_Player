@@ -63,7 +63,9 @@ fun Home(modifier: Modifier = Modifier, navController: NavHostController) {
     val musicList = homeViewModel.musicList.observeAsState()
 
     LaunchedEffect(key1 = 0) {
-        homeViewModel.setPlayer(context)
+        homeViewModel.setPlayer(context).also {
+            homeViewModel.setUpNotificationManager(context)
+        }
     }
 
 
@@ -105,7 +107,7 @@ private fun PlayerView(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             LinearProgressIndicator(
-                progress = { (currentPosition.value!! * 100) / totalDuration.value!!.toFloat() },
+                progress = { (currentPosition.value!!  / totalDuration.value!!).toFloat() },
                 modifier = Modifier.fillMaxWidth(),
                 color = Color.White,
             )

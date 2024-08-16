@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Compose_Player</string>
+    <string name="media_notification_channel">media channel\t\t\t\t</string>
+    <string name="media_notification_channel_description">demo</string>
 </resources>
