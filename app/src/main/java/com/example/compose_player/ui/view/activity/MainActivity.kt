@@ -10,13 +10,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.media3.session.SessionToken
 import androidx.navigation.compose.rememberNavController
 import com.example.compose_player.navigation.NavHostScreen
 import com.example.compose_player.ui.theme.Compose_PlayerTheme
+import com.example.compose_player.utils.MusicPlayerService
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -49,6 +51,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
 
+}
 

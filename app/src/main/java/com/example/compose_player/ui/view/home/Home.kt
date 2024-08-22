@@ -32,7 +32,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableLongState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,12 +64,12 @@ fun Home(modifier: Modifier = Modifier, navController: NavHostController) {
     val context = LocalContext.current
     val homeViewModel = hiltViewModel<HomeViewModel>()
     val musicList = homeViewModel.musicList.observeAsState()
+    homeViewModel.getContext(context)
 
-    LaunchedEffect(key1 = 0) {
-        homeViewModel.setPlayer(context).also {
-            homeViewModel.setUpNotificationManager(context)
-        }
+    var isPlay = rememberSaveable {
+        mutableStateOf(false)
     }
+
 
 
     BottomSheetScaffold(
@@ -84,7 +87,20 @@ fun Home(modifier: Modifier = Modifier, navController: NavHostController) {
             musicList.value?.let { it1 ->
                 items(it1.size) {
                     MusicItem(musicList.value!![it]) {
-                        homeViewModel.clickToPlay(it)
+                        if(!isPlay.value)
+                        {
+                            isPlay.value= true
+//                            homeViewModel.controllerFuture.get().play()
+                            Log.e("Song", "Home: Song Playing.....", )
+                        }
+                        else
+                        {
+                            isPlay.value= false
+//                            homeViewModel.controllerFuture.get().pause()
+                            Log.e("Song", "Home: Song Pause.....", )
+
+                        }
+//                        homeViewModel.clickToPlay(it)
                     }
                 }
             }
@@ -98,8 +114,7 @@ fun Home(modifier: Modifier = Modifier, navController: NavHostController) {
 private fun PlayerView(
     viewModel: HomeViewModel
 ) {
-    var currentPosition = viewModel.currentPosition.observeAsState()
-    var totalDuration = viewModel.totalDuration.observeAsState()
+
     Box(
         Modifier
             .fillMaxWidth()
@@ -107,7 +122,7 @@ private fun PlayerView(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             LinearProgressIndicator(
-                progress = { (currentPosition.value!!  / totalDuration.value!!).toFloat() },
+                progress = {0f },
                 modifier = Modifier.fillMaxWidth(),
                 color = Color.White,
             )
@@ -118,24 +133,21 @@ private fun PlayerView(
             ) {
 
                 ControlButton(icon = R.drawable.baseline_skip_previous_24, size = 50.dp, onClick = {
-                    viewModel.previousSong()
                 })
                 Spacer(modifier = Modifier.width(20.dp))
-                ControlButton(icon = if (viewModel.isPlaying.observeAsState().value!!) R.drawable.baseline_pause_circle_outline_24 else R.drawable.baseline_play_circle_outline_24,
+                ControlButton(icon = R.drawable.baseline_play_circle_outline_24,
                     size = 100.dp,
                     onClick = {
-                        viewModel.playOrPauseMusic()
                     })
                 Spacer(modifier = Modifier.width(20.dp))
                 ControlButton(icon = R.drawable.baseline_skip_next_24, size = 50.dp, onClick = {
-                    viewModel.nextSong()
                 })
             }
             Spacer(modifier = Modifier.height(5.dp))
 
             if (viewModel.musicList.value!!.isNotEmpty()) {
                 Text(
-                    "${viewModel.musicList.value!![viewModel.currentMediaItemIndex.observeAsState().value!!].song}",
+                    "song",
                     Modifier.basicMarquee(),
                 )
             }
