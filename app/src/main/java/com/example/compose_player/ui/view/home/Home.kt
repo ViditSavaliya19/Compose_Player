@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -54,65 +56,89 @@ import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.example.compose_player.R
 import com.example.compose_player.data.model.MusicModelItem
+import com.example.compose_player.domain.model.Song
+import com.example.compose_player.domain.other.PlayerState
 
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MutableCollectionMutableState")
 @Composable
-fun Home(modifier: Modifier = Modifier, navController: NavHostController) {
-    val context = LocalContext.current
-    val homeViewModel = hiltViewModel<HomeViewModel>()
-    val musicList = homeViewModel.musicList.observeAsState()
-    homeViewModel.getContext(context)
-
-    var isPlay = rememberSaveable {
-        mutableStateOf(false)
-    }
-
+fun Home(
+    modifier: Modifier = Modifier, navController: NavHostController, onEvent: (HomeEvent) -> Unit,
+    uiState: HomeUiState,
+    playerState: PlayerState?,
+) {
 
 
     BottomSheetScaffold(
         sheetContent = {
-            PlayerView(homeViewModel)
+            with(uiState) {
+                when {
+                    loading == true -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            LinearProgressIndicator()
+                        }
+                    }
+
+                    loading == false && errorMessage == null -> {
+                        PlayerView(onEvent, playerState)
+                    }
+
+                    errorMessage != null -> {
+                        Text(text = errorMessage)
+                    }
+                }
+
+            }
         },
         sheetShape = RoundedCornerShape(20.dp),//Rounded corners
         sheetPeekHeight = 200.dp,
         scaffoldState = rememberBottomSheetScaffoldState(),
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.padding(it),
-        ) {
-            musicList.value?.let { it1 ->
-                items(it1.size) {
-                    MusicItem(musicList.value!![it]) {
-                        if(!isPlay.value)
-                        {
-                            isPlay.value= true
-//                            homeViewModel.controllerFuture.get().play()
-                            Log.e("Song", "Home: Song Playing.....", )
-                        }
-                        else
-                        {
-                            isPlay.value= false
-//                            homeViewModel.controllerFuture.get().pause()
-                            Log.e("Song", "Home: Song Pause.....", )
-
-                        }
-//                        homeViewModel.clickToPlay(it)
+        with(uiState) {
+            when {
+                loading == true -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
+                }
+
+                loading == false && errorMessage == null -> {
+
+                    if (songs != null) {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier.padding(it),
+                        ) {
+                            items(count = songs.size) {
+                                MusicItem(song = songs[it]) {
+                                    onEvent(HomeEvent.OnSongSelected(songs[it]))
+                                    onEvent(HomeEvent.PlaySong)
+                                }
+
+                            }
+                        }
+                    }
+
+                }
+
+                errorMessage != null -> {
+                    Text(text = errorMessage)
                 }
             }
         }
     }
-
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PlayerView(
-    viewModel: HomeViewModel
+    onEvent: (HomeEvent) -> Unit,
+    playerState: PlayerState?
 ) {
 
     Box(
@@ -122,7 +148,7 @@ private fun PlayerView(
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             LinearProgressIndicator(
-                progress = {0f },
+                progress = { 0f },
                 modifier = Modifier.fillMaxWidth(),
                 color = Color.White,
             )
@@ -133,35 +159,41 @@ private fun PlayerView(
             ) {
 
                 ControlButton(icon = R.drawable.baseline_skip_previous_24, size = 50.dp, onClick = {
+                    onEvent.invoke(HomeEvent.SkipToPreviousSong)
                 })
                 Spacer(modifier = Modifier.width(20.dp))
-                ControlButton(icon = R.drawable.baseline_play_circle_outline_24,
+                ControlButton(icon = if (playerState == PlayerState.PAUSED) R.drawable.baseline_play_circle_outline_24 else R.drawable.baseline_pause_circle_outline_24,
                     size = 100.dp,
                     onClick = {
+                        if (playerState == PlayerState.PLAYING) {
+                            onEvent(HomeEvent.PauseSong)
+                        } else {
+                            onEvent(HomeEvent.ResumeSong)
+                        }
                     })
                 Spacer(modifier = Modifier.width(20.dp))
                 ControlButton(icon = R.drawable.baseline_skip_next_24, size = 50.dp, onClick = {
+                    onEvent.invoke(HomeEvent.SkipToNextSong)
+
                 })
             }
             Spacer(modifier = Modifier.height(5.dp))
 
-            if (viewModel.musicList.value!!.isNotEmpty()) {
-                Text(
-                    "song",
-                    Modifier.basicMarquee(),
-                )
-            }
+            Text(
+                "song",
+                Modifier.basicMarquee(),
+            )
         }
     }
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun MusicItem(musicModelItem: MusicModelItem, onClick: () -> Unit = {}) {
+fun MusicItem(song: Song, onClick: () -> Unit = {}) {
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Card(modifier = Modifier.padding(10.dp), onClick = { onClick() }) {
             GlideImage(
-                model = musicModelItem.data!!.image, contentDescription = "", loading = placeholder(
+                model = song.imageUrl, contentDescription = "", loading = placeholder(
                     R.drawable.ic_launcher_background
                 ), modifier = Modifier
                     .height(150.dp)
@@ -170,7 +202,7 @@ fun MusicItem(musicModelItem: MusicModelItem, onClick: () -> Unit = {}) {
         }
         Spacer(modifier = Modifier.height(5.dp))
         Text(
-            text = musicModelItem.song ?: "",
+            text = song.title,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleMedium,
             overflow = TextOverflow.Ellipsis,
