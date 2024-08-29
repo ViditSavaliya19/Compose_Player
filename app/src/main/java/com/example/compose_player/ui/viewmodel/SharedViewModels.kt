@@ -38,7 +38,7 @@ class SharedViewModels @Inject constructor(val musicController: MusicController)
                 if (playerState == PlayerState.PLAYING) {
                     viewModelScope.launch {
                         while (true) {
-                            delay(3.seconds)
+                            delay(1.seconds)
                             musicControllerUiState = musicControllerUiState.copy(
                                 currentPosition = musicController.getCurrentPosition()
                             )

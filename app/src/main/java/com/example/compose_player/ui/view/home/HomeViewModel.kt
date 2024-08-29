@@ -16,6 +16,13 @@ import com.example.compose_player.data.model.MusicModelItem
 import com.example.compose_player.data.repository.MusicRepository
 import com.example.compose_player.domain.model.Song
 import com.example.compose_player.domain.service.MusicController
+import com.example.compose_player.domain.usecase.AddMediaItemsUseCase
+import com.example.compose_player.domain.usecase.GetCurrentSongPositionUseCase
+import com.example.compose_player.domain.usecase.PauseSongUseCase
+import com.example.compose_player.domain.usecase.PlaySongUseCase
+import com.example.compose_player.domain.usecase.ResumeSongUseCase
+import com.example.compose_player.domain.usecase.SkipToNextSongUseCase
+import com.example.compose_player.domain.usecase.SkipToPreviousSongUseCase
 import com.example.compose_player.utils.network.DataState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
@@ -28,16 +35,16 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     val repository: MusicRepository,
-    val musicController: MusicController
+    private val addMediaItemsUseCase: AddMediaItemsUseCase,
+    private val playSongUseCase: PlaySongUseCase,
+    private val pauseSongUseCase: PauseSongUseCase,
+    private val resumeSongUseCase: ResumeSongUseCase,
+    private val skipToNextSongUseCase: SkipToNextSongUseCase,
+    private val skipToPreviousSongUseCase: SkipToPreviousSongUseCase,
 ) : ViewModel() {
 
     var homeUiState by mutableStateOf(HomeUiState())
         private set
-
-    val musicData: MutableState<DataState<List<MusicModelItem>>> = mutableStateOf(DataState.Loading)
-    private val _musicList = MutableLiveData<List<MusicModelItem>>(emptyList())
-    val musicList: LiveData<List<MusicModelItem>> = _musicList
-
 
     fun onEvent(event: HomeEvent) {
         when (event) {
@@ -68,7 +75,7 @@ class HomeViewModel @Inject constructor(
                         errorMessage = it.message
                     )
                 }
-                .collect() {
+                .collect {
                     homeUiState = when (it) {
                         is DataState.Success -> {
                             val mediaItemList = it.data?.let { song ->
@@ -82,10 +89,10 @@ class HomeViewModel @Inject constructor(
                                     )
                                 }
                             }
-                            musicController.addMediaItems(mediaItemList!!)
+                            addMediaItemsUseCase(mediaItemList!!)
                             homeUiState.copy(
                                 loading = false,
-                                songs = mediaItemList
+                                songs = mediaItemList,
                             )
                         }
                         is DataState.Loading -> {
@@ -107,27 +114,21 @@ class HomeViewModel @Inject constructor(
     private fun playSong() {
         homeUiState.apply {
             songs?.indexOf(selectedSong)?.let {
-                musicController.play(it)
+                playSongUseCase(it)
             }
         }
     }
 
-    private fun pauseSong() {
-        musicController.pause()
+    private fun pauseSong() = pauseSongUseCase()
+
+    private fun resumeSong() = resumeSongUseCase()
+
+    private fun skipToNextSong() = skipToNextSongUseCase {
+        homeUiState = homeUiState.copy(selectedSong = it)
     }
 
-    private fun resumeSong() {
-        musicController.resume()
-    }
-
-    private fun skipToNextSong() {
-        musicController.skipToNextSong()
-        homeUiState = homeUiState.copy(selectedSong = musicController.getCurrentSong())
-    }
-
-    private fun skipToPreviousSong() {
-        musicController.skipToPreviousSong()
-        homeUiState = homeUiState.copy(selectedSong = musicController.getCurrentSong())
+    private fun skipToPreviousSong() = skipToPreviousSongUseCase {
+        homeUiState = homeUiState.copy(selectedSong = it)
     }
 
 

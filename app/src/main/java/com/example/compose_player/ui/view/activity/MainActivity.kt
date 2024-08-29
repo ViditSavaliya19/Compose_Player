@@ -22,8 +22,8 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val splashViewModel: MainViewModel by viewModels()
     private val sharedViewModel: SharedViewModels by viewModels()
+    private val splashViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -25,11 +25,6 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideApplicationContext(): ApplicationContext {
-        return  ApplicationContext()
-    }
-    @Singleton
-    @Provides
     fun provideMusicController(@ApplicationContext context: Context): MusicController =
         MusicControllerImpl(context)
 

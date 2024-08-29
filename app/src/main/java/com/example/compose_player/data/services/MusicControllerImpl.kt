@@ -8,6 +8,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.example.compose_player.data.mapper.toSong
@@ -16,6 +18,7 @@ import com.example.compose_player.domain.other.PlayerState
 import com.example.compose_player.domain.service.MusicController
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import kotlin.math.log
 
 class MusicControllerImpl(context: Context) : MusicController {
 
@@ -46,6 +49,7 @@ class MusicControllerImpl(context: Context) : MusicController {
         mediaController?.addListener(object : Player.Listener {
             override fun onEvents(player: Player, events: Player.Events) {
                 super.onEvents(player, events)
+
                 with(player) {
                     mediaControllerCallback?.invoke(
                         playbackState.toPlayerState(isPlaying),
@@ -57,23 +61,32 @@ class MusicControllerImpl(context: Context) : MusicController {
                     )
                 }
             }
+
+            override fun onPlayerErrorChanged(error: PlaybackException?) {
+                Log.e("ExoPlayerChange", "Error: -----==== ${error?.message}")
+            }
             override fun onPlayerError(error: PlaybackException) {
                 Log.e("ExoPlayer", "Error: ====-----==== ${error.message}")
             }
         })
     }
 
-    private fun Int.toPlayerState(isPlaying: Boolean) = when (this) {
-        Player.STATE_IDLE -> PlayerState.STOPPED
-        Player.STATE_ENDED -> PlayerState.STOPPED
-        else -> if (isPlaying) PlayerState.PLAYING else PlayerState.PAUSED
+    private fun Int.toPlayerState(isPlaying: Boolean): PlayerState {
+
+       return when (this) {
+            Player.STATE_IDLE -> PlayerState.STOPPED
+            Player.STATE_ENDED -> PlayerState.STOPPED
+            else -> if (isPlaying) PlayerState.PLAYING else PlayerState.PAUSED
+        }
     }
 
 
     override fun addMediaItems(songs: List<Song>) {
 
         val mediaItems = songs.map {
+
             MediaItem.Builder()
+                .setMediaId(it.songUrl)
                 .setUri(it.songUrl)
                 .setMediaMetadata(
                 MediaMetadata.Builder()
@@ -84,11 +97,9 @@ class MusicControllerImpl(context: Context) : MusicController {
                     .build()
             ).build()
         }
-        mediaController?.setMediaItems(mediaItems)
 
-        Log.e("Media Assign", "addMediaItems: ${mediaController}")
-        Log.e("Media Controller", "addMediaItems: ${mediaController!!.getMediaItemAt(0).toSong()}")
-    }
+        mediaController?.setMediaItems(mediaItems)
+        }
 
     override fun play(mediaItemIndex: Int) {
         mediaController?.apply {

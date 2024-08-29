@@ -20,9 +20,13 @@ import com.example.compose_player.ui.view.home.HomeViewModel
 import com.example.compose_player.ui.viewmodel.SharedViewModels
 
 @Composable
-fun NavHostScreen(modifier: Modifier = Modifier, navController: NavHostController,sharedViewModel: SharedViewModels) {
+fun NavHostScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    sharedViewModel: SharedViewModels
+) {
 
-   val musicControllerUiState =  sharedViewModel.musicControllerUiState
+    val musicControllerUiState = sharedViewModel.musicControllerUiState
     val activity = (LocalContext.current as ComponentActivity)
 
     NavHost(navController = navController, startDestination = "/", modifier = modifier)
@@ -36,10 +40,16 @@ fun NavHostScreen(modifier: Modifier = Modifier, navController: NavHostControlle
                     isInitialized.value = true
                 }
             }
-            Home(modifier = modifier,navController, onEvent = homeViewModel::onEvent, uiState = homeViewModel.homeUiState, playerState = musicControllerUiState.playerState)
+            Home(
+                modifier = modifier, navController,
+                onEvent = homeViewModel::onEvent,
+                uiState = homeViewModel.homeUiState,
+                playerState = musicControllerUiState.playerState,
+                musicControllerUiState
+            )
         }
         composable(route = "video") {
-            VideoPlayerScreen(modifier = modifier,navController)
+            VideoPlayerScreen(modifier = modifier, navController)
         }
     }
 
