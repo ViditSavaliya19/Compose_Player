@@ -225,10 +225,10 @@ private fun PlayerView(
         )
         Column(
             Modifier
-                .fillMaxWidth()
-                .offset {
-                    animatedAlign
-                },
+                .fillMaxWidth(),
+//                .offset {
+//                    animatedAlign
+//                },
             horizontalAlignment = Alignment.CenterHorizontally,
 //            verticalArrangement = Arrangement.Top,
 //            verticalArrangement = if (currentValue == SheetValue.PartiallyExpanded) Arrangement.Top else Arrangement.Bottom,
