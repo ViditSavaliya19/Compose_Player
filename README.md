@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://github.com/user-attachments/assets/874a718b-4731-4165-8eae-d756329cb245">
+<img src="https://github.com/user-attachments/assets/161ab212-440d-408d-9ca4-8e34d509db78">
 
 
 # **Music Player**
@@ -32,7 +32,7 @@ Using Exo Player Media 3
 
 ## 📝 License
 
-Copyright © [Milan Kathiriya](https://github.com/viditsavaliya19). <br>
+Copyright © [Vidit Savaliya](https://github.com/viditsavaliya19). <br>
 This project is [MIT](LICENSE.md) licensed.
 
 
