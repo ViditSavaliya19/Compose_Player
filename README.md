@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://github.com/user-attachments/assets/161ab212-440d-408d-9ca4-8e34d509db78">
+<img src="https://github.com/user-attachments/assets/0d7d8dab-a66f-4c8a-92dd-10a8236361be">
 
 
 # **Music Player**
