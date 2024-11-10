@@ -18,12 +18,14 @@ import com.example.compose_player.ui.view.home.Home
 import com.example.compose_player.ui.view.home.HomeEvent
 import com.example.compose_player.ui.view.home.HomeViewModel
 import com.example.compose_player.ui.viewmodel.SharedViewModels
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun NavHostScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    sharedViewModel: SharedViewModels
+    sharedViewModel: SharedViewModels,
+    isConnected: StateFlow<Boolean>
 ) {
 
     val musicControllerUiState = sharedViewModel.musicControllerUiState
@@ -45,11 +47,12 @@ fun NavHostScreen(
                 onEvent = homeViewModel::onEvent,
                 uiState = homeViewModel.homeUiState,
                 playerState = musicControllerUiState.playerState,
-                musicControllerUiState
+                isConnected = isConnected,
+                musicControllerUiState,
             )
         }
         composable(route = "video") {
-            VideoPlayerScreen(modifier = modifier, navController)
+            VideoPlayerScreen(modifier = modifier, navController,isConnected)
         }
     }
 

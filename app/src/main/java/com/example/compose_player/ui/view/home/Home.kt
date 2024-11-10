@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -25,6 +26,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,7 +39,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,7 +69,10 @@ import com.example.compose_player.R
 import com.example.compose_player.data.model.MusicControllerUiState
 import com.example.compose_player.domain.model.Song
 import com.example.compose_player.domain.other.PlayerState
+import com.example.compose_player.ui.components.NetworkOff
 import com.example.compose_player.ui.view.home.component.VinylAnimation
+import com.example.compose_player.ui.viewmodel.NetworkViewModel
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 
@@ -75,7 +84,8 @@ fun Home(
     modifier: Modifier = Modifier, navController: NavHostController, onEvent: (HomeEvent) -> Unit,
     uiState: HomeUiState,
     playerState: PlayerState?,
-    musicControllerUiState: MusicControllerUiState
+    isConnected: StateFlow<Boolean>,
+    musicControllerUiState: MusicControllerUiState,
 ) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -87,99 +97,114 @@ fun Home(
         bottomSheetState = sheetState
     )
 
-    BottomSheetScaffold(
-        modifier = modifier,
-        sheetContent = {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectVerticalDragGestures { change, dragAmount ->
-                            Log.e("TAG", "Home: ------>>>> $dragAmount")
-                            if (dragAmount > 0) {
-                                coroutineScope.launch {
-                                    sheetState.partialExpand()
-                                }
-                            } else {
-                                coroutineScope.launch {
-                                    sheetState.expand()
+   val isCon =  isConnected.collectAsState().value
+    Log.e("IsConnected", "Home: $isCon" )
+    if (isCon)
+
+        BottomSheetScaffold(
+            modifier = modifier,
+            sheetContent = {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectVerticalDragGestures { change, dragAmount ->
+                                Log.e("TAG", "Home: ------>>>> $dragAmount")
+                                if (dragAmount > 0) {
+                                    coroutineScope.launch {
+                                        sheetState.partialExpand()
+                                    }
+                                } else {
+                                    coroutineScope.launch {
+                                        sheetState.expand()
+                                    }
                                 }
                             }
                         }
+                ) {
+                    with(uiState) {
+                        when {
+                            loading == true -> {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    LinearProgressIndicator()
+                                }
+                            }
+
+                            loading == false && errorMessage == null -> {
+                                PlayerView(
+                                    onEvent,
+                                    playerState,
+                                    uiState,
+                                    musicControllerUiState,
+                                    sheetState.currentValue
+                                )
+                            }
+
+                            errorMessage != null -> {
+                                Box(modifier = Modifier.background(color = Color.Black)) {
+
+                                }
+                            }
+                        }
+
                     }
+                }
+            },
+            sheetShape = RoundedCornerShape(20.dp),//Rounded corners
+            sheetPeekHeight = 200.dp,
+            scaffoldState = bottomSheetScaffoldState,
+
             ) {
+            Box(Modifier.padding(top = 20.dp)) {
+
                 with(uiState) {
                     when {
                         loading == true -> {
                             Box(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                LinearProgressIndicator()
+                                CircularProgressIndicator()
                             }
                         }
 
                         loading == false && errorMessage == null -> {
-                            PlayerView(
-                                onEvent,
-                                playerState,
-                                uiState,
-                                musicControllerUiState,
-                                sheetState.currentValue
-                            )
-                        }
 
-                        errorMessage != null -> {
-                            Text(text = errorMessage)
-                        }
-                    }
+                            if (songs != null) {
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(2),
+                                    modifier = Modifier.padding(it),
+                                ) {
+                                    items(count = songs.size) {
+                                        MusicItem(song = songs[it]) {
+                                            onEvent(HomeEvent.OnSongSelected(songs[it]))
+                                            onEvent(HomeEvent.PlaySong)
+                                        }
 
-                }
-            }
-        },
-        sheetShape = RoundedCornerShape(20.dp),//Rounded corners
-        sheetPeekHeight = 200.dp,
-        scaffoldState = bottomSheetScaffoldState,
-
-        ) {
-        Box(Modifier.padding(top = 20.dp)) {
-
-            with(uiState) {
-                when {
-                    loading == true -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-
-                    loading == false && errorMessage == null -> {
-
-                        if (songs != null) {
-                            LazyVerticalGrid(
-                                columns = GridCells.Fixed(2),
-                                modifier = Modifier.padding(it),
-                            ) {
-                                items(count = songs.size) {
-                                    MusicItem(song = songs[it]) {
-                                        onEvent(HomeEvent.OnSongSelected(songs[it]))
-                                        onEvent(HomeEvent.PlaySong)
                                     }
-
                                 }
                             }
                         }
-                    }
 
-                    errorMessage != null -> {
-                        Text(text = errorMessage)
+                        errorMessage != null -> {
+                            Box(
+                                modifier = Modifier
+                                    .background(color = Color.Black)
+                                    .fillMaxSize(), contentAlignment = Alignment.Center
+                            ) {
+
+                            }
+                        }
                     }
                 }
             }
         }
-    }
+    else
+        NetworkOff()
+
 }
 
 @OptIn(

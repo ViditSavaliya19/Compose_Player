@@ -1,8 +1,8 @@
 [versions]
 accompanistSystemuicontroller = "0.33.2-alpha"
-agp = "8.5.1"
+agp = "8.7.2"
 kotlin = "1.9.0"
-coreKtx = "1.10.1"
+coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
@@ -15,12 +15,13 @@ nav_version = "2.7.7"
 exo_player = "1.4.0"
 retrofit = "2.9.0"
 hilt = "2.51.1"
-hiltCompose = "1.0.0"
+hiltCompose = "1.2.0"
 logging = "4.12.0"
 coreSplashscreen = "1.0.1"
 glide = "1.0.0-beta01"
 runtimeLivedata = "1.6.8"
 firebaseFirestoreKtx = "25.0.0"
+ksp = "1.9.0-1.0.12"
 
 
 [libraries]
@@ -60,4 +61,4 @@ androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtim
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 google-dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-
+google-devtools-ksp = {id="com.google.devtools.ksp", version.ref = "ksp"}

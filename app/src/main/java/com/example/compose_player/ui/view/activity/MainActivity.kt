@@ -4,6 +4,7 @@ import android.Manifest
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -16,16 +17,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.example.compose_player.data.services.MusicPlayerService
 import com.example.compose_player.navigation.NavHostScreen
+import com.example.compose_player.ui.components.NetworkOff
 import com.example.compose_player.ui.theme.Blue
 import com.example.compose_player.ui.theme.Compose_PlayerTheme
+import com.example.compose_player.ui.viewmodel.NetworkViewModel
 import com.example.compose_player.ui.viewmodel.SharedViewModels
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -65,10 +70,12 @@ class MainActivity : ComponentActivity() {
             splashViewModel.isLoading.value
         }
         setContent {
+            val networkViewModel = remember { NetworkViewModel(this) }
+            val isConnected = networkViewModel.networkStatus
 
             Compose_PlayerTheme {
                 val navController = rememberNavController()
-                NavHostScreen(navController = navController, sharedViewModel = sharedViewModel)
+                NavHostScreen(navController = navController, sharedViewModel = sharedViewModel, isConnected = isConnected)
             }
         }
     }
@@ -92,3 +99,9 @@ fun SplashCompose(modifier: Modifier = Modifier) {
     }
 }
 
+
+@Preview(showBackground = true)
+@Composable
+fun SplashComposePreview() {
+    SplashCompose()
+}
