@@ -1,19 +1,19 @@
 plugins {
-    id("kotlin-kapt")
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.dagger.hilt.android)
+    alias(libs.plugins.google.devtools.ksp)
 
 }
 
 android {
     namespace = "com.example.compose_player"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.compose_player"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -79,15 +79,13 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
+        ksp(libs.hilt.android.compiler)
     implementation(libs.logging.interceptor)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.compose)
-    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.33.2-alpha")
-    implementation ("androidx.media3:media3-exoplayer:1.1.1")
+    implementation (libs.accompanist.systemuicontroller)
+    implementation (libs.androidx.media3.exoplayer.v111)
 
 }
-kapt {
-    correctErrorTypes = true
-}
+

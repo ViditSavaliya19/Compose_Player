@@ -1,7 +1,11 @@
 package com.example.compose_player.di
 
+import android.app.Application
+import android.content.Context
 import com.example.compose_player.data.remote.ApiServices
 import com.example.compose_player.data.repository.MusicRepository
+import com.example.compose_player.data.services.MusicControllerImpl
+import com.example.compose_player.domain.service.MusicController
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,8 +25,8 @@ object RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideApplicationContext(): ApplicationContext {
-        return  ApplicationContext()
-    }
+    fun provideMusicController(@ApplicationContext context: Context): MusicController =
+        MusicControllerImpl(context)
+
 
 }

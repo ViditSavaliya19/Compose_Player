@@ -18,16 +18,22 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VideoPlayerScreen(modifier: Modifier = Modifier, navController: NavHostController) {
+fun VideoPlayerScreen(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    isConnected: StateFlow<Boolean>
+) {
     val context = LocalContext.current
     val exoPlayer = ExoPlayer.Builder(context).build()
 
-    val mediaSource = remember("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4") {
-        MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4")
-    }
+    val mediaSource =
+        remember("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4") {
+            MediaItem.fromUri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4")
+        }
 
     val mediaSourceFactory: MediaSource.Factory = remember {
         DefaultMediaSourceFactory(context)
